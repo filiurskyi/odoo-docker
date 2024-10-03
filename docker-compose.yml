@@ -14,12 +14,12 @@ services:
       # - ./config:/etc/odoo  # Optional: custom config directory
       # - ./addons:/mnt/extra-addons  # Optional: custom addons directory
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.odoo.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.services.odoo.loadbalancer.server.port=8069"
-      - "traefik.tls.stores.default.defaultgeneratedcert.resolver=myresolver"
-      - "traefik.tls.stores.default.defaultgeneratedcert.domain.main=${DOMAIN}"
-      - "traefik.docker.network=web"
+      - traefik.enable=true
+      - traefik.https.routers.odoo.rule=Host(`${DOMAIN}`)
+      - traefik.https.services.odoo.loadbalancer.server.port=8069
+      - traefik.tls.stores.default.defaultgeneratedcert.resolver=myresolver
+      - traefik.tls.stores.default.defaultgeneratedcert.domain.main=${DOMAIN}
+      - traefik.docker.network=web
     networks:
       - web
 
@@ -37,23 +37,26 @@ services:
   traefik:
     image: traefik
     command:
-      - "--api.insecure=false"  # False for production, remove this line to enable it for local testing
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--log.level=DEBUG"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.email=postmaster@example.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=websecure"
-      - "--certificatesresolvers.myresolver.acme.email=${EMAIL}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - --api.insecure=false  # False for production, remove this line to enable it for local testing
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --log.level=DEBUG
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.myresolver.acme.email=postmaster@example.com
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.myresolver.acme.httpchallenge=true
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=https
+      - --certificatesresolvers.myresolver.acme.email=${EMAIL}
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    labels:
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true=label
     ports:
-      - "80:80"
-      - "443:443"
+      - 80:80
+      - 443:443
     volumes:
       - ./letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
