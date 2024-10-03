@@ -45,7 +45,7 @@ services:
       - --providers.docker.exposedbydefault=false
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
-      - --log.level=DEBUG
+      # - --log.level=DEBUG
       - --certificatesresolvers.myresolver.acme.httpchallenge=true
       - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
