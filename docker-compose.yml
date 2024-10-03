@@ -4,11 +4,6 @@ services:
     depends_on:
       - db
       - traefik
-    # environment:
-    #   - DB_HOST=db
-    #   - DB_PORT=5432
-    #   - DB_USER=odoo
-    #   - DB_PASSWORD=odoo
     volumes:
       - odoo-web:/var/lib/odoo
       # - ./config:/etc/odoo  # Optional: custom config directory
@@ -28,7 +23,7 @@ services:
       - web
 
   db:
-    image: postgres:13
+    image: postgres
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=odoo
