@@ -31,7 +31,7 @@ services:
       - odoo-db-data:/var/lib/postgresql/data
 
   traefik:
-    image: traefik:v2.10
+    image: traefik
     command:
       - "--api.insecure=false"  # False for production, remove this line to enable it for local testing
       - "--providers.docker=true"
