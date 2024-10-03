@@ -18,6 +18,8 @@ services:
       - "traefik.http.routers.odoo.rule=Host(`${DOMAIN}`)"
       - "traefik.http.services.odoo.loadbalancer.server.port=8069"
       - "traefik.docker.network=web"
+    networks:
+      - web
 
   db:
     image: postgres:13
@@ -55,4 +57,4 @@ volumes:
 
 networks:
   web:
-    external: true
+    driver: bridge
