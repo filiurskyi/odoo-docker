@@ -4,8 +4,6 @@ services:
     depends_on:
       - db
       - traefik
-    environment:
-      - PROXY_MODE=True
     volumes:
       - odoo-web:/var/lib/odoo
       # - ./config:/etc/odoo  # Optional: custom config directory
