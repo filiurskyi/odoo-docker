@@ -11,7 +11,7 @@ services:
       - ADMIN_PASSWORD=${ODOO_ADMIN_PASS}
     volumes:
       - odoo-web-data:/var/lib/odoo
-      - ./config:/etc/odoo  # Optional: custom config directory
+      # - ./config:/etc/odoo  # Optional: custom config directory
       # - ./addons:/mnt/extra-addons  # Optional: custom addons directory
     labels:
       - "traefik.enable=true"
