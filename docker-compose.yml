@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  odoo:
+    image: odoo:17.0
+    depends_on:
+      - db
+      - traefik
+    environment:
+      - HOST=db
+      - USER=${POSTGRES_USER}
+      - PASSWORD=${ODOO_DB_PASSWORD}
+      - ADMIN_PASSWORD=${ODOO_ADMIN_PASS}
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./config:/etc/odoo  # Optional: custom config directory
+      - ./addons:/mnt/extra-addons  # Optional: custom addons directory
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.odoo.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.services.odoo.loadbalancer.server.port=8069"
+      - "traefik.docker.network=web"
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=false"  # False for production, remove this line to enable it for local testing
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+
+volumes:
+  odoo-web-data:
+  odoo-db-data:
+  letsencrypt:
+
+networks:
+  web:
+    external: true
