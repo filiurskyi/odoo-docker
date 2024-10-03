@@ -10,11 +10,13 @@ services:
       - PASSWORD=${ODOO_DB_PASSWORD}
       - ADMIN_PASSWORD=${ODOO_ADMIN_PASS}
     volumes:
-      - odoo-web-data:/var/lib/odoo
+      - odoo-web:/var/lib/odoo
       # - ./config:/etc/odoo  # Optional: custom config directory
       # - ./addons:/mnt/extra-addons  # Optional: custom addons directory
     labels:
       - traefik.enable=true
+      - traefik.http.routers.odoo.rule=Host(`${DOMAIN}`)
+      - traefik.http.services.odoo.loadbalancer.server.port=8069
       - traefik.https.routers.odoo.rule=Host(`${DOMAIN}`)
       - traefik.https.services.odoo.loadbalancer.server.port=8069
       - traefik.tls.stores.default.defaultgeneratedcert.resolver=myresolver
@@ -30,7 +32,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - odoo-db-data:/var/lib/postgresql/data
+      - odoo-db:/var/lib/postgresql/data
     networks:
       - web
 
@@ -45,15 +47,10 @@ services:
       - --log.level=DEBUG
       - --certificatesresolvers.myresolver.acme.tlschallenge=true
       #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.myresolver.acme.email=postmaster@example.com
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.myresolver.acme.httpchallenge=true
       - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=https
       - --certificatesresolvers.myresolver.acme.email=${EMAIL}
-      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
-    labels:
-      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
-      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true=label
     ports:
       - 80:80
       - 443:443
@@ -64,9 +61,8 @@ services:
       - web    
 
 volumes:
-  odoo-web-data:
-  odoo-db-data:
-  letsencrypt:
+  odoo-web:
+  odoo-db:
 
 networks:
   web:
