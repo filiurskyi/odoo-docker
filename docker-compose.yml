@@ -15,12 +15,14 @@ services:
       # - ./addons:/mnt/extra-addons  # Optional: custom addons directory
     labels:
       - traefik.enable=true
-      - traefik.http.routers.odoo.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.odoo-http.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.odoo-http.entrypoints=http
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.routers.odoo-http.middlewares=redirect-to-https
+      - traefik.http.routers.odoo-https.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.odoo-https.entrypoints=https
+      - traefik.http.routers.odoo-https.tls=true
       - traefik.http.services.odoo.loadbalancer.server.port=8069
-      - traefik.https.routers.odoo.rule=Host(`${DOMAIN}`)
-      - traefik.https.services.odoo.loadbalancer.server.port=8069
-      - traefik.tls.stores.default.defaultgeneratedcert.resolver=myresolver
-      - traefik.tls.stores.default.defaultgeneratedcert.domain.main=${DOMAIN}
       - traefik.docker.network=web
     networks:
       - web
@@ -39,17 +41,15 @@ services:
   traefik:
     image: traefik
     command:
-      - --api.insecure=false  # False for production, remove this line to enable it for local testing
+      - --api.insecure=false  # Set to true for testing, remove in production
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
       - --log.level=DEBUG
-      - --certificatesresolvers.myresolver.acme.tlschallenge=true
-      #- --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.myresolver.acme.httpchallenge=true
-      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=https
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.myresolver.acme.email=${EMAIL}
     ports:
       - 80:80
