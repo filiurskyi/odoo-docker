@@ -11,8 +11,8 @@ services:
       - ADMIN_PASSWORD=${ODOO_ADMIN_PASS}
     volumes:
       - odoo-web-data:/var/lib/odoo
-      - ./config:/etc/odoo  # Optional: custom config directory
-      - ./addons:/mnt/extra-addons  # Optional: custom addons directory
+      # - ./config:/etc/odoo  # Optional: custom config directory
+      # - ./addons:/mnt/extra-addons  # Optional: custom addons directory
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.odoo.rule=Host(`${DOMAIN}`)"
@@ -29,6 +29,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
+    networks:
+      - web
 
   traefik:
     image: traefik
