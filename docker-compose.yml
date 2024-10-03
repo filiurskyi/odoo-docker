@@ -6,9 +6,9 @@ services:
       - traefik
     environment:
       - HOST=db
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - ADMIN_PASSWORD=${ODOO_ADMIN_PASS}
+      - USER=${POSTGRES_USER}
+      - PASSWORD=${POSTGRES_PASSWORD}
+      # - ADMIN_PASSWORD=${ODOO_ADMIN_PASS}
     volumes:
       - odoo-web:/var/lib/odoo
       # - ./config:/etc/odoo  # Optional: custom config directory
@@ -30,6 +30,7 @@ services:
   db:
     image: postgres:13
     environment:
+      - POSTGRES_DB=postgres
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
