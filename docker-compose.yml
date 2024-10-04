@@ -24,6 +24,8 @@ services:
       - traefik.docker.network=web
     networks:
       - web
+    restart: 
+      always
 
   db:
     image: postgres
@@ -35,6 +37,8 @@ services:
       - odoo-db:/var/lib/postgresql/data
     networks:
       - web
+    restart: 
+      always
 
   traefik:
     image: traefik
@@ -56,7 +60,9 @@ services:
       - ./letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - web    
+      - web
+    restart: 
+      always
 
 volumes:
   odoo-web:
