@@ -28,7 +28,7 @@ services:
       always
 
   db:
-    image: postgres
+    image: postgres:latest
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=odoo
@@ -41,7 +41,7 @@ services:
       always
 
   traefik:
-    image: traefik
+    image: traefik:latest
     command:
       - --api.insecure=false  # Set to true for testing, remove in production
       - --providers.docker=true
