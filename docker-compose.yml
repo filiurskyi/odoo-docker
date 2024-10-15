@@ -4,6 +4,7 @@ services:
     depends_on:
       - db
       - traefik
+      - maddy  # Ensure maddy starts before Odoo
     volumes:
       - odoo-web:/var/lib/odoo
       - ./config:/etc/odoo  # Optional: custom config directory
@@ -14,19 +15,15 @@ services:
       - traefik.http.routers.odoo-http.entrypoints=http
       - traefik.http.routers.odoo-http.middlewares=redirect-to-https
       - traefik.http.routers.odoo-https.tls.certresolver=myresolver
-      # HTTPS router
       - traefik.http.routers.odoo-https.rule=Host(`${DOMAIN}`)
       - traefik.http.routers.odoo-https.entrypoints=https
       - traefik.http.routers.odoo-https.tls=true
       - traefik.http.services.odoo.loadbalancer.server.port=8069
-      # Middleware to redirect HTTP to HTTPS
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-      # Ensure this service is attached to the correct Traefik network
       - traefik.docker.network=web
     networks:
       - web
-    restart: 
-      always
+    # restart: always
 
   db:
     image: postgres:latest
@@ -38,8 +35,7 @@ services:
       - odoo-db:/var/lib/postgresql/data
     networks:
       - web
-    restart: 
-      always
+    # restart: always
 
   traefik:
     image: traefik:latest
@@ -62,12 +58,39 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - web
-    restart: 
-      always
+    # restart: always
+
+  maddy:
+    image: foxcpp/maddy:latest
+    environment:
+      - MADDY_HOSTNAME=mail.${DOMAIN}
+      - MADDY_DOMAIN=${DOMAIN}
+    volumes:
+      - maddy-data:/data
+    ports:
+      - 25:25      # SMTP
+      - 465:465    # SMTPS (SMTP over SSL)
+      - 587:587    # SMTP Submission
+      - 143:143    # IMAP
+      - 993:993    # IMAPS (IMAP over SSL)
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.maddy-http.rule=Host(`mail.${DOMAIN}`)
+      - traefik.http.routers.maddy-http.entrypoints=http
+      - traefik.http.routers.maddy-http.middlewares=redirect-to-https
+      - traefik.http.routers.maddy-https.tls.certresolver=myresolver
+      - traefik.http.routers.maddy-https.rule=Host(`mail.${DOMAIN}`)
+      - traefik.http.routers.maddy-https.entrypoints=https
+      - traefik.http.routers.maddy-https.tls=true
+      - traefik.docker.network=web
+    networks:
+      - web
+    # restart: always
 
 volumes:
   odoo-web:
   odoo-db:
+  maddy-data:
 
 networks:
   web:
