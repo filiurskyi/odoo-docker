@@ -1,4 +1,10 @@
 #!/bin/bash
 
-sudo jq -r '.myresolver.Certificates[] | select(.domain.main=="xxx") | .key' ./letsencrypt/acme.json | base64 -d > privkey.pem
-sudo jq -r '.myresolver.Certificates[] | select(.domain.main=="xxx") | .certificate' ./letsencrypt/acme.json | base64 -d > fullchain.pem
+# Load the .env file to make variables available
+source .env
+
+# Use the DOMAIN variable from the .env file in the jq command
+jq -r ".myresolver.Certificates[] | select(.domain.main==\"$DOMAIN\") | .certificate" ./letsencrypt/acme.json | base64 -d > fullchain.pem
+jq -r ".myresolver.Certificates[] | select(.domain.main==\"$DOMAIN\") | .key" ./letsencrypt/acme.json | base64 -d > privkey.pem
+
+echo "Certificates extracted successfully for domain: $DOMAIN"
