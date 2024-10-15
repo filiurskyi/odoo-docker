@@ -67,7 +67,7 @@ services:
       - MADDY_DOMAIN=${DOMAIN}
     volumes:
       - maddy-data:/data
-      - ./letsencrypt:/data/tls
+      - ./maddy_tls:/data/tls
     ports:
       - 25:25      # SMTP
       - 465:465    # SMTPS (SMTP over SSL)
