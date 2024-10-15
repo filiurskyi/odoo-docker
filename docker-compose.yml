@@ -63,10 +63,11 @@ services:
   maddy:
     image: foxcpp/maddy:latest
     environment:
-      - MADDY_HOSTNAME=mail.${DOMAIN}
+      - MADDY_HOSTNAME=${EMAIL_PREFIX}.${DOMAIN}
       - MADDY_DOMAIN=${DOMAIN}
     volumes:
       - maddy-data:/data
+      - ./letsencrypt:/data/tls
     ports:
       - 25:25      # SMTP
       - 465:465    # SMTPS (SMTP over SSL)
@@ -75,11 +76,11 @@ services:
       - 993:993    # IMAPS (IMAP over SSL)
     labels:
       - traefik.enable=true
-      - traefik.http.routers.maddy-http.rule=Host(`mail.${DOMAIN}`)
+      - traefik.http.routers.maddy-http.rule=Host(`${EMAIL_PREFIX}.${DOMAIN}`)
       - traefik.http.routers.maddy-http.entrypoints=http
       - traefik.http.routers.maddy-http.middlewares=redirect-to-https
       - traefik.http.routers.maddy-https.tls.certresolver=myresolver
-      - traefik.http.routers.maddy-https.rule=Host(`mail.${DOMAIN}`)
+      - traefik.http.routers.maddy-https.rule=Host(`${EMAIL_PREFIX}.${DOMAIN}`)
       - traefik.http.routers.maddy-https.entrypoints=https
       - traefik.http.routers.maddy-https.tls=true
       - traefik.docker.network=web
